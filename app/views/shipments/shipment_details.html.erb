@@ -1,0 +1,44 @@
+<% provide(:title, 'Shipment details') %>
+<h1>Shipment details</h1>
+
+<div class="row">
+  <div class="col-md-6 col-md-offset-3">
+    <%= form_for(@Shipment, url: shipments_create_path(:ship => @shipment)) do |f| %>
+    
+      <%= f.label "Origin" %>
+        <%= @Shipment.origin.street %>, 
+        <%= @Shipment.origin.number %>
+        <%= hidden_field_tag 'originLat', @Shipment.origin.lat %>
+        <%= hidden_field_tag 'originLng', @Shipment.origin.long %>
+      <br>
+      
+      <%= f.label "Destination" %> 
+        <%= @Shipment.destination.street %>, 
+        <%= @Shipment.destination.number %>
+        <%= hidden_field_tag 'destinationLat', @Shipment.destination.lat%>
+        <%= hidden_field_tag 'destinationLng', @Shipment.destination.long %>
+      <br>
+      
+      <%= f.label "receiver's user email" %>
+      <%= text_field_tag 'receiver' %>
+      
+      <%= f.label :payment %>
+      <%= f.select :payment, options_for_select([["I pay"], ["He pays"], ["Both"]]) %>
+      
+      <%= f.label :drive %>
+      <%= f.collection_select :driver, @near_drivers, :id, :name,  {:prompt => @select_value, :selected => :id } %>
+      
+      <%= f.label 'Price per Kg' %>
+      $<%= @price_per_kilo %>
+      <%= hidden_field_tag 'price_per_kilo', @price_per_kilo %>
+      <br>
+      
+      <%= f.label 'Weight' %>
+      <%= f.text_field :weight %>
+      
+
+
+      <%= f.submit "Create shipment", class: "btn btn-primary" %>
+    <% end %>
+  </div>
+</div>
