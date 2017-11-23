@@ -1,9 +1,9 @@
 class ShipmentsController < ApplicationController
   
   before_action :init_shipment
-  before_action do 
-    require_login("user")
-  end
+  # before_action do 
+  #   require_login("user")
+  # end
   
   def init_shipment
     @Shipment ||= Shipment.new
@@ -129,6 +129,19 @@ class ShipmentsController < ApplicationController
     near_drivers << driver2 unless driver2.nil?
     near_drivers << driver3 unless driver3.nil?
     return near_drivers
+  end
+  
+  def get_drivers_in_progress_shipments
+    current_driver = params[:driver]
+    @shipment_in_progress = Shipment.where(:state => 'In Progress' , :driver_id => current_driver) 
+    pp "shipments", current_driver,  @shipment_in_progress
+    render json: @shipment_in_progress
+  end
+  
+  def get_drivers_delivered_shipments
+    current_driver = params[:driverId]
+    @shipment_deliveder = Shipment.where(:state => 'Delivered', :driver_id => current_driver) 
+    render json: @shipment_deliveder
   end
 
   private
