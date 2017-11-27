@@ -1,6 +1,5 @@
 class ShipmentsController < ApplicationController
   
-  before_action :init_shipment
   # before_action do 
   #   require_login("user")
   # end
@@ -13,28 +12,28 @@ class ShipmentsController < ApplicationController
     @shipment = Shipment.new
   end
   
-  def details
-    @near_drivers = get_near_drivers(params[:originLat], params[:originLng])
-    if @near_drivers.length==0
-      flash[:danger] = 'No hay drivers disponibles en este momento'
-      redirect_to root_path
-    else
-      originLoc = create_location(params[:originLat], params[:originLng])
-      destinationLoc = create_location(params[:destinationLat], params[:destinationLng])
-      @Shipment.origin = originLoc
-      @Shipment.destination = destinationLoc
-      # @halfShipment = params[:shipment]
-      @price_per_kilo = calculate_price_per_kg
-      # @details = 
-      
-      
-      obj = {drivers: @near_drivers, price: @price_per_kilo }
-      pp obj
-      
-    end
+  def get_location_details()
+    lat = params[:lat]
+    lng = params[:lng]
+    geocode = JSON.parse Net::HTTP.get(URI.parse("https://maps.googleapis.com/maps/api/geocode/json?latlng="+ lat +"," + lng + "&key=AIzaSyCULAfBJit219O85L4mwt4nqVhBL9KARCQ"))
+    
+    addresses = geocode["results"][0]["address_components"]
+    number = ''
+    address = ''
+    addresses.each { |adr|
+      if adr["types"][0] == "route"
+        address = adr["long_name"]
+      elsif adr["types"][0] == "street_number"
+        number = adr["long_name"]
+      end
+    }
+    
+    render json: {street: address, number: number}
+    #return Location.new(lat: lat, long: lng, street: address, number: number, zipcode: zipcode)
   end
   
   def create
+    pp 'llegaranskinski'
     @Shipment = Shipment.new(user_params)
     originLoc = create_location(params[:originLat], params[:originLng])
     destinationLoc = create_location(params[:destinationLat], params[:destinationLng])
@@ -92,8 +91,6 @@ class ShipmentsController < ApplicationController
   end
   
   
-  
-  
   def get_drivers_in_progress_shipments
     current_driver = params[:driver]
     @shipment_in_progress = Shipment.where(:state => 'In Progress' , :driver_id => current_driver) 
@@ -106,46 +103,25 @@ class ShipmentsController < ApplicationController
     @shipment_deliveder = Shipment.where(:state => 'Delivered', :driver_id => current_driver) 
     render json: @shipment_deliveder
   end
+  
+  def details
+    originLat = params[:originLat]
+    originLng = params[:originLng]
+    destinationLat = params[:destinationLat]
+    destinationLng = params[:destinationLng]
+    body = '?originLat=' + originLat + '&originLng=' + originLng
+    uri = 'drivers/nearby' + body
+    drivers = Faraday.get(ENV['URL_APP'] + uri)
+    price_per_kilo = calculate_price_per_kg
+    pp 'vamo arruca', drivers
+    redirect_to (ENV['URL_APP'] + 'shipment/details?originLat=' + originLat + '&originLng=' + originLng + '&destinationLat=' + destinationLat + '&destinationLng=' + destinationLng + '&price=' + price_per_kilo.to_s + '&drivers=' + JSON.parse(drivers.body).to_s)
+  end
+  
 
   private
     
     def user_params
       params.require(:shipment).permit(:weight, :payment)
-    end
-    
-    def get_near_drivers(lat, lng)
-      driver1, driver2, driver3 = nil
-      d1, d2, d3 = nil
-      Driver.includes(:location).all.each do |d|
-        if d.available
-          distance = Geocoder::Calculations.distance_between([lat.to_f,lng.to_f], [d.location.lat,d.location.long])
-          if d3 == nil || distance < d3
-            if d2 == nil || distance < d2
-              if d1 == nil || distance < d1
-                d3 = d2 
-                driver3 = driver2
-                d2 = d1
-                driver2 = driver1
-                d1 = distance
-                driver1 = d
-              else
-                d3 = d2
-                driver3 = driver2
-                d2 = distance
-                driver2 = d
-              end
-            else
-              d3 = distance
-              driver3 = d
-            end
-          end
-        end
-      end
-      near_drivers = []
-      near_drivers << driver1 unless driver1.nil?
-      near_drivers << driver2 unless driver2.nil?
-      near_drivers << driver3 unless driver3.nil?
-      return near_drivers
     end
     
       def calculate_price_per_kg
@@ -154,7 +130,8 @@ class ShipmentsController < ApplicationController
         pass = ENV['PASSWORDAPI']
         conn = Faraday.new(url: url_api) 
         conn.basic_auth(user, pass)
-        JSON.parse(conn.get('/cost').body)["cost"]
+        # JSON.parse(conn.get('/cost').body)["cost"]
+        return 20
       end
   
 end
