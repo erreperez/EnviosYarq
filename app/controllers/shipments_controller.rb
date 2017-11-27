@@ -25,17 +25,13 @@ class ShipmentsController < ApplicationController
       @Shipment.destination = destinationLoc
       # @halfShipment = params[:shipment]
       @price_per_kilo = calculate_price_per_kg
-      render "../views/shipments/shipment_details"
+      # @details = 
+      
+      
+      obj = {drivers: @near_drivers, price: @price_per_kilo }
+      pp obj
+      
     end
-  end
-  
-  def calculate_price_per_kg
-    url_api = ENV['URLAPIKG']
-    user = ENV['USERAPI']
-    pass = ENV['PASSWORDAPI']
-    conn = Faraday.new(url: url_api) 
-    conn.basic_auth(user, pass)
-    JSON.parse(conn.get('/cost').body)["cost"]
   end
   
   def create
@@ -96,40 +92,7 @@ class ShipmentsController < ApplicationController
   end
   
   
-  def get_near_drivers(lat, lng)
-    driver1, driver2, driver3 = nil
-    d1, d2, d3 = nil
-    Driver.includes(:location).all.each do |d|
-      if d.available
-        distance = Geocoder::Calculations.distance_between([lat.to_f,lng.to_f], [d.location.lat,d.location.long])
-        if d3 == nil || distance < d3
-          if d2 == nil || distance < d2
-            if d1 == nil || distance < d1
-              d3 = d2 
-              driver3 = driver2
-              d2 = d1
-              driver2 = driver1
-              d1 = distance
-              driver1 = d
-            else
-              d3 = d2
-              driver3 = driver2
-              d2 = distance
-              driver2 = d
-            end
-          else
-            d3 = distance
-            driver3 = d
-          end
-        end
-      end
-    end
-    near_drivers = []
-    near_drivers << driver1 unless driver1.nil?
-    near_drivers << driver2 unless driver2.nil?
-    near_drivers << driver3 unless driver3.nil?
-    return near_drivers
-  end
+  
   
   def get_drivers_in_progress_shipments
     current_driver = params[:driver]
@@ -149,4 +112,49 @@ class ShipmentsController < ApplicationController
     def user_params
       params.require(:shipment).permit(:weight, :payment)
     end
+    
+    def get_near_drivers(lat, lng)
+      driver1, driver2, driver3 = nil
+      d1, d2, d3 = nil
+      Driver.includes(:location).all.each do |d|
+        if d.available
+          distance = Geocoder::Calculations.distance_between([lat.to_f,lng.to_f], [d.location.lat,d.location.long])
+          if d3 == nil || distance < d3
+            if d2 == nil || distance < d2
+              if d1 == nil || distance < d1
+                d3 = d2 
+                driver3 = driver2
+                d2 = d1
+                driver2 = driver1
+                d1 = distance
+                driver1 = d
+              else
+                d3 = d2
+                driver3 = driver2
+                d2 = distance
+                driver2 = d
+              end
+            else
+              d3 = distance
+              driver3 = d
+            end
+          end
+        end
+      end
+      near_drivers = []
+      near_drivers << driver1 unless driver1.nil?
+      near_drivers << driver2 unless driver2.nil?
+      near_drivers << driver3 unless driver3.nil?
+      return near_drivers
+    end
+    
+      def calculate_price_per_kg
+        url_api = ENV['URLAPIKG']
+        user = ENV['USERAPI']
+        pass = ENV['PASSWORDAPI']
+        conn = Faraday.new(url: url_api) 
+        conn.basic_auth(user, pass)
+        JSON.parse(conn.get('/cost').body)["cost"]
+      end
+  
 end
