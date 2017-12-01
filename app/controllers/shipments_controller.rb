@@ -69,13 +69,13 @@ class ShipmentsController < ApplicationController
   
   
   def get_drivers_in_progress_shipments
-    current_driver = params[:driver]
+    current_driver = params[:driver_id]
     @shipment_in_progress = Shipment.where(:state => 'In Progress' , :driver_id => current_driver) 
     render json: @shipment_in_progress
   end
   
   def get_drivers_delivered_shipments
-    current_driver = params[:driverId]
+    current_driver = params[:driver_id]
     @shipment_deliveder = Shipment.where(:state => 'Delivered', :driver_id => current_driver) 
     render json: @shipment_deliveder
   end
