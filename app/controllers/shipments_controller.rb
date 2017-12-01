@@ -3,6 +3,7 @@ class ShipmentsController < ApplicationController
   # before_action do 
   #   require_login("user")
   # end
+  protect_from_forgery with: :null_session, if: Proc.new { |c| c.request.format == 'application/json' }
   
   def init_shipment
     @Shipment ||= Shipment.new
@@ -33,59 +34,36 @@ class ShipmentsController < ApplicationController
   end
   
   def create
-    pp 'llegaranskinski'
-    @Shipment = Shipment.new(user_params)
-    @Shipment.originLat = params[:originLat]
-    @Shipment.originLng = params[:originLng]
-    @Shipment.destinationLat = params[:destinationLat]
-    @Shipment.destinationLng = params[:destinationLng]
-    @Shipment.state = 'In Progress'
-    @Shipment.date = DateTime.now
-    @Shipment.sender = params[:current_user]
-    # @Shipment.driver = Driver.find_by_id(params[:shipment][:driver])
-    @Shipment.price = params[:price_per_kilo] * @Shipment.weight
-    
-    # @user = User.find_by_id(current_user.id)
-    @user = get_current_user(@Shipment.sender)
-    
-    if @user.discounts > 0
-      @Shipment.price = @Shipment.price / 2
-      @user.discounts -= 1
-      @user.save(validate: false)
-    end
-    
-    if current_user.new_user
-      if current_user.invitee != nil
-        @invitee = User.find_by_id(current_user.invitee)
-        @invitee.discounts = @invitee.discounts + 1
-        @invitee.save(validate: false)
-      end
-      @user.new_user = false
-      @user.save(validate: false)
-    end
-    
-    @Shipment.driver.available = false;
-    @Shipment.driver.save(validate: false)
-    
-    
-    receiver = User.find_by_email(params[:receiver])
-    if receiver != nil
-      @Shipment.receiver = receiver
-    else 
-      receiver = User.new do |u|
-        u.email = params[:receiver]
-        u.name = "a"
-        u.password = "12345678"
-      end
-      receiver.save
-      @Shipment.receiver = receiver
-      UserMailer.welcome_email(@Shipment.receiver.email, @Shipment.sender.id).deliver_later
-    end
-    if @Shipment.save
-      redirect_to root_path
-      flash[:success] = "Success!"
+    driver_id = params[:driver_id]
+    cant = Shipment.where(driver_id: driver_id, state: 'In Progress')
+    if cant.length > 0 
+      render json: {:status => 400, :message => 'This driver is unavailable' }
     else
-      flash[:danger] = 'error'
+      @Shipment = Shipment.new()
+      @Shipment.payment = params[:payment]
+      @Shipment.weight = params[:weight]
+      @Shipment.origin_lat = params[:originLat]
+      @Shipment.origin_lng = params[:originLng]
+      @Shipment.destination_lat = params[:destinationLat]
+      @Shipment.destination_lng = params[:destinationLng]
+      @Shipment.state = 'In Progress'
+      @Shipment.date = DateTime.now
+      @Shipment.sender_id = params[:sender]
+      @Shipment.driver_id = driver_id
+      @Shipment.price = params[:price_per_kilo] * @Shipment.weight
+      
+      if params[:has_discount] != '0'
+        @Shipment.price = @Shipment.price / 2
+      end
+
+      # @Shipment.driver.save(validate: false)
+      
+      if @Shipment.save
+        render json: {status: 200}
+        flash[:success] = "Success!"
+      else
+        render json: {status: 400, :message => 'The shipment cant be saved, try later men'}
+      end
     end
   end
   
@@ -111,22 +89,11 @@ class ShipmentsController < ApplicationController
     uri = 'drivers/nearby' + body
     drivers = Faraday.get(ENV['URL_APP'] + uri)
     price_per_kilo = calculate_price_per_kg
-    pp 'vamo arruca', drivers
-    redirect_to (ENV['URL_APP'] + 'shipment/details?originLat=' + originLat + '&originLng=' + originLng + '&destinationLat=' + destinationLat + '&destinationLng=' + destinationLng + '&price=' + price_per_kilo.to_s + '&drivers=' + JSON.parse(drivers.body).to_s)
+    redirect_to ENV['URL_APP'] + 'shipments/details?originLat=' + originLat + '&originLng=' + originLng + '&destinationLat=' + destinationLat + '&destinationLng=' + destinationLng + '&price=' + price_per_kilo.to_s + '&drivers=' + (JSON.parse(drivers.body).to_s)
   end
   
 
   private
-  
-    def get_current_user(userId)
-      uri = 'get_user?userId=' + userId
-      resp = Faraday.get(ENV['URL_APP'] + uri)
-      pp 'current user', resp.body
-    end
-    
-    def user_params
-      params.require(:shipment).permit(:weight, :payment)
-    end
     
       def calculate_price_per_kg
         url_api = ENV['URLAPIKG']

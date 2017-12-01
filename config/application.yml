@@ -1,8 +1,8 @@
 development:
   GMAIL_USERNAME: 'enviosyarq'
   GMAIL_PASSWORD: 'enviosyarq2017'
-  URL_APP: 'https://obligatorio1-erreperez.c9users.io:8080/'
-  URL_SHIPMENT: 'https://obligatorio1-erreperez.c9users.io:8081/'
+  URL_APP: 'https://envios-ya-mateoc10.c9users.io:8081/'
+  URL_SHIPMENT: 'https://envios-ya-mateoc10.c9users.io:8082/'
   URLAPIKG: 'https://delivery-rates.mybluemix.net/'
   USERAPI: '180121'
   PASSWORDAPI: 'EDQBtYNNP2H1'
