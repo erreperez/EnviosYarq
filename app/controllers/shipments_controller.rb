@@ -92,6 +92,11 @@ class ShipmentsController < ApplicationController
     redirect_to ENV['URL_APP'] + 'shipments/details?originLat=' + originLat + '&originLng=' + originLng + '&destinationLat=' + destinationLat + '&destinationLng=' + destinationLng + '&price=' + price_per_kilo.to_s + '&drivers=' + (JSON.parse(drivers.body).to_s)
   end
   
+  def find_shipment_by_id
+    shipment = Shipment.find_by_id(params[:id])
+    render json: shipment
+  end
+  
 
   private
     
