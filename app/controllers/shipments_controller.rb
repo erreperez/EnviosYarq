@@ -124,8 +124,7 @@ class ShipmentsController < ApplicationController
         pass = ENV['PASSWORDAPI']
         conn = Faraday.new(url: url_api) 
         conn.basic_auth(user, pass)
-        # JSON.parse(conn.get('/cost').body)["cost"]
-        return 20
+        JSON.parse(conn.get('/cost').body)["cost"]
       end
   
 end
