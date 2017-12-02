@@ -92,6 +92,29 @@ class ShipmentsController < ApplicationController
     redirect_to ENV['URL_APP'] + 'shipments/details?originLat=' + originLat + '&originLng=' + originLng + '&destinationLat=' + destinationLat + '&destinationLng=' + destinationLng + '&price=' + price_per_kilo.to_s + '&drivers=' + (JSON.parse(drivers.body).to_s)
   end
   
+  def find_shipment_by_id
+    shipment = Shipment.find_by_id(params[:id])
+    render json: shipment
+  end
+  
+  def end_shipment
+    shipment = Shipment.find_by_id(params[:shipment_id])
+    shipment.state = 'Delivered'
+    if shipment.save
+      
+      conn = Faraday.new(ENV['URL_APP'])
+      rsp = conn.post('drivers/end_shipment', { :driver_id => shipment.driver_id, :lat => shipment.destination_lat, :lng => shipment.destination_lng })
+      
+      render json: rsp.body
+    else
+      render json: { :status => 400, :message => 'something went wrong' }
+    end
+      
+
+    # UserMailer.confirmation_email(@Shipment).deliver_later
+    # redirect_to '/drivers/shipment_list'
+  end
+  
 
   private
     
