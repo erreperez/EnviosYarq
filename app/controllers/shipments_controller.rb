@@ -101,11 +101,7 @@ class ShipmentsController < ApplicationController
     shipment = Shipment.find_by_id(params[:shipment_id])
     shipment.state = 'Delivered'
     if shipment.save
-      
-      conn = Faraday.new(ENV['URL_APP'])
-      rsp = conn.post('drivers/end_shipment', { :driver_id => shipment.driver_id, :lat => shipment.destination_lat, :lng => shipment.destination_lng })
-      
-      render json: rsp.body
+      render json: { :status => 200 }
     else
       render json: { :status => 400, :message => 'something went wrong' }
     end
