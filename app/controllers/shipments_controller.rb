@@ -51,6 +51,7 @@ class ShipmentsController < ApplicationController
       @Shipment.sender_id = params[:sender]
       @Shipment.driver_id = driver_id
       @Shipment.price = params[:price_per_kilo] * @Shipment.weight
+      @Shipment.receiver_id = params[:receiver]
       
       if params[:has_discount] != '0'
         @Shipment.price = @Shipment.price / 2
