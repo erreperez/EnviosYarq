@@ -50,7 +50,7 @@ class ShipmentsController < ApplicationController
       @Shipment.date = DateTime.now
       @Shipment.sender_id = params[:sender]
       @Shipment.driver_id = driver_id
-      @Shipment.price = params[:price_per_kilo] * @Shipment.weight
+      @Shipment.price = params[:price_per_kilo].to_f * @Shipment.weight.to_f
       @Shipment.receiver_id = params[:receiver]
       
       if params[:has_discount] != '0'
