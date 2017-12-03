@@ -1,0 +1,13 @@
+applications:
+- name: shipments-enviosyarq
+  instances: 1
+  memory: 256M
+  disk_quota: 1024M
+  routes:
+  - route: shipments-enviosyarq.mybluemix.net
+  buildpack: https://github.com/cloudfoundry/ruby-buildpack.git
+  command: rails server -p $PORT
+  services:
+  - shipments-enviosyarq-redis
+  - shipments-enviosyarq-db
+  stack: cflinuxfs2
