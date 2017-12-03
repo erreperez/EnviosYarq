@@ -14,5 +14,5 @@ production:
   URLAPIKG: 'https://delivery-rates.mybluemix.net/'
   USERAPI: '180121'
   PASSWORDAPI: 'EDQBtYNNP2H1'
-  URL_SHIPMENT: 'https://shipments-enviosyarq.mybluemix.net'
-  URL_APP: 'https://envios-ya-obligatorio.mybluemix.net'
+  URL_SHIPMENT: 'https://shipments-enviosyarq.mybluemix.net/'
+  URL_APP: 'https://envios-ya-obligatorio.mybluemix.net/'
