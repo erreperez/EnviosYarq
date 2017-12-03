@@ -6,3 +6,13 @@ development:
   URLAPIKG: 'https://delivery-rates.mybluemix.net/'
   USERAPI: '180121'
   PASSWORDAPI: 'EDQBtYNNP2H1'
+  
+production:
+  GMAIL_USERNAME: 'enviosyarq'
+  GMAIL_PASSWORD: 'enviosyarq2017'
+  URL: 'https://envios-ya-obligatorio.mybluemix.net'
+  URLAPIKG: 'https://delivery-rates.mybluemix.net/'
+  USERAPI: '180121'
+  PASSWORDAPI: 'EDQBtYNNP2H1'
+  URL_SHIPMENT: 'https://shipments-enviosyarq.mybluemix.net'
+  URL_APP: 'https://envios-ya-obligatorio.mybluemix.net'
