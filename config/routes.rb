@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   get '/get_address', to: 'shipments#get_location_details'
   post '/end_shipment', to: 'shipments#end_shipment'
   get '/find_by_id', to: 'shipments#find_shipment_by_id'
+  health_check_routes
+  match '*path' => 'application#routing_error', :via => [:get]
 
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

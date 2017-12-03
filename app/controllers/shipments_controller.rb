@@ -102,14 +102,11 @@ class ShipmentsController < ApplicationController
     shipment = Shipment.find_by_id(params[:shipment_id])
     shipment.state = 'Delivered'
     if shipment.save
+      ShipmentMailer.confirmation_email(shipment, params[:sender_email], params[:receiver_email]).deliver_later
       render json: { :status => 200 }
     else
       render json: { :status => 400, :message => 'something went wrong' }
     end
-      
-
-    # UserMailer.confirmation_email(@Shipment).deliver_later
-    # redirect_to '/drivers/shipment_list'
   end
   
 

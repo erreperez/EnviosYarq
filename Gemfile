@@ -35,6 +35,7 @@ gem 'jbuilder', '~> 2.5'
  gem 'activerecord-postgis-adapter'
  gem 'faraday'
  gem 'figaro'
+ gem 'health_check'
  
  
 
